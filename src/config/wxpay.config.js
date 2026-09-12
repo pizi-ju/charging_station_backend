@@ -1,23 +1,28 @@
-/**
- * 微信支付配置文件
- *
- * 部署说明：
- *  - 将 YOUR_XXX 替换为真实值即可运行微信支付功能
- *  - 如果暂时不想启用微信支付，只改真实值就行
- *
- * 获取方式：
- *  - appId / appSecret / mchId → 微信支付商户平台
- *  - apiV3Key → 微信支付商户平台 → APIv3密钥（32位）
- *  - publicKey → 微信支付商户平台 → API证书 → 下载证书后提取
- *  - privateKey → 微信支付商户平台 → API证书 → 下载证书后提取
- *  - domain → 你的回调地址，如 https://www.example.com/api/wxpay/notify
- */
+const fs = require('fs');
+const path = require('path');
+
+require('dotenv').config();
+
+function required(key) {
+  const v = process.env[key];
+  if (!v) {
+    throw new Error(`[wxpay.config] 缺少环境变量 ${key}，请在 .env 中配置`);
+  }
+  return v;
+}
+
 module.exports = {
-    appId: 'YOUR_APPID',
-    mchId: 'YOUR_MCHID',
-    appSecret: 'YOUR_APPSECRET',
-    apiV3Key: 'YOUR_APISECRET',
-    publicKey: '-----BEGIN CERTIFICATE-----\nYOUR_PUBLICKEY\n-----END CERTIFICATE-----',
-    privateKey: '-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATEKEY\n-----END PRIVATE KEY-----',
-    domain: 'YOUR_DOMAIN',
+    // 小程序配置
+    appId: process.env.WX_APP_ID || '',
+    appSecret: process.env.WX_APP_SECRET || '',
+
+    // 商户配置
+    mchId: process.env.WX_MCH_ID || '',
+    // V3需要证书路径而非单一API密钥
+    publicKey: fs.readFileSync(path.join(__dirname, '../../cert/pay_cert/apiclient_cert.pem')),
+    privateKey: fs.readFileSync(path.join(__dirname, '../../cert/pay_cert/apiclient_key.pem')),
+    apiV3Key: process.env.WX_API_V3_KEY || '',
+
+    // 回调域名
+    domain: process.env.WX_NOTIFY_DOMAIN || ''
 };
